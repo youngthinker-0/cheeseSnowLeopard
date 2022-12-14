@@ -12,7 +12,8 @@ module EX(
     output wire data_sram_en,
     output wire [3:0] data_sram_wen,
     output wire [31:0] data_sram_addr,
-    output wire [31:0] data_sram_wdata
+    output wire [31:0] data_sram_wdata,
+    output wire inst_is_load
 );
 
     reg [`ID_TO_EX_WD-1:0] id_to_ex_bus_r;
@@ -93,23 +94,28 @@ module EX(
         ex_result       // 31:0
     };
     
+    assign inst_is_load = (inst[31:26] == 6'b10_0011);
+
     assign ex_to_rf_bus = {
         rf_we,
         rf_waddr,
         ex_result
     };
-    
+    assign data_sram_en = data_ram_en;
+    assign data_sram_wen = data_ram_wen;
+    assign data_sram_addr = ex_result;
+    assign data_sram_wdata = rf_rdata2;
     // MUL part
     wire [63:0] mul_result;
-    wire mul_signed; // 有符号乘法标记
+    wire mul_signed; // æç¬¦å·ä¹æ³æ è®°
 
     mul u_mul(
     	.clk        (clk            ),
         .resetn     (~rst           ),
         .mul_signed (mul_signed     ),
-        .ina        (rf_rdata1      ), // 乘法源操作数1
-        .inb        (rf_rdata2      ), // 乘法源操作数2
-        .result     (mul_result     ) // 乘法结果 64bit
+        .ina        (rf_rdata1      ), // ä¹æ³æºæä½æ°1
+        .inb        (rf_rdata2      ), // ä¹æ³æºæä½æ°2
+        .result     (mul_result     ) // ä¹æ³ç»æ 64bit
     );
 
     // DIV part
@@ -132,7 +138,7 @@ module EX(
         .opdata2_i    (div_opdata2_o    ),
         .start_i      (div_start_o      ),
         .annul_i      (1'b0      ),
-        .result_o     (div_result     ), // 除法结果 64bit
+        .result_o     (div_result     ), // é¤æ³ç»æ 64bit
         .ready_o      (div_ready_i      )
     );
 
@@ -203,6 +209,6 @@ module EX(
         end
     end
 
-    // mul_result 和 div_result 可以直接使用
+    // mul_result å div_result å¯ä»¥ç´æ¥ä½¿ç¨
     
 endmodule

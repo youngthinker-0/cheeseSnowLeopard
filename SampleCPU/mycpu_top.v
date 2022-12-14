@@ -25,7 +25,7 @@ module mycpu_top(
     wire [31:0] inst_sram_addr_v, data_sram_addr_v;
 
     mycpu_core u_mycpu_core(
-    	.clk               (clk               ),
+        .clk               (clk               ),
         .rst               (~resetn           ),
         .int               (ext_int           ),
         .inst_sram_en      (inst_sram_en      ),
@@ -45,12 +45,12 @@ module mycpu_top(
     );
 
     mmu u0_mmu(
-    	.addr_i (inst_sram_addr_v ),
+        .addr_i (inst_sram_addr_v ),
         .addr_o (inst_sram_addr   )
     );
 
     mmu u1_mmu(
-    	.addr_i (data_sram_addr_v ),
+        .addr_i (data_sram_addr_v ),
         .addr_o (data_sram_addr   )
     );
     
