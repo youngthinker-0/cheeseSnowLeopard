@@ -105,6 +105,7 @@ module EX(
     assign data_sram_wen = data_ram_wen;
     assign data_sram_addr = ex_result;
     assign data_sram_wdata = rf_rdata2;
+
     // MUL part
     wire [63:0] mul_result;
     wire mul_signed; // æç¬¦å·ä¹æ³æ è®°
