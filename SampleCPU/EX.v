@@ -4,7 +4,7 @@ module EX(
     input wire rst,
     // input wire flush,
     input wire [`StallBus-1:0] stall,
-
+    output wire stallreq_for_ex,
     input wire [`ID_TO_EX_WD-1:0] id_to_ex_bus,
 
     output wire [`EX_TO_MEM_WD-1:0] ex_to_mem_bus,
@@ -44,11 +44,20 @@ module EX(
     wire sel_rf_res;
     wire [31:0] rf_rdata1, rf_rdata2;
     reg is_in_delayslot;
+    wire [31:0] hi_i,lo_i;
+    wire [7:0] hilo_op;
+    wire inst_mfhi, inst_mflo, inst_mthi, inst_mtlo, inst_mult, inst_multu, inst_div, inst_divu;
+    wire hi_we, lo_we;
+    wire op_mul, op_div;
+    wire [65:0] hilo_bus;
+    wire [31:0] hi_o,lo_o;
 
     assign {
-        ex_pc,          // 148:117
-        inst,           // 116:85
-        alu_op,         // 84:83
+        hilo_op,        // 230:223
+        hi_i,lo_i,      // 222:159
+        ex_pc,          // 158:127
+        inst,           // 126:95
+        alu_op,         // 94:83
         sel_alu_src1,   // 82:80
         sel_alu_src2,   // 79:76
         data_ram_en,    // 75
@@ -82,29 +91,24 @@ module EX(
         .alu_result  (alu_result  )
     );
 
-    assign ex_result = alu_result;
-
-    assign ex_to_mem_bus = {
-        ex_pc,          // 75:44
-        data_ram_en,    // 43
-        data_ram_wen,   // 42:39
-        sel_rf_res,     // 38
-        rf_we,          // 37
-        rf_waddr,       // 36:32
-        ex_result       // 31:0
-    };
-    
     assign inst_is_load = (inst[31:26] == 6'b10_0011);
 
-    assign ex_to_rf_bus = {
-        rf_we,
-        rf_waddr,
-        ex_result
-    };
+   
     assign data_sram_en = data_ram_en;
     assign data_sram_wen = data_ram_wen;
     assign data_sram_addr = ex_result;
     assign data_sram_wdata = rf_rdata2;
+    //hilo-hilo-hilo
+
+    assign {
+        inst_mfhi, inst_mflo, inst_mthi, inst_mtlo, inst_mult, inst_multu, inst_div, inst_divu
+    } = hilo_op;
+
+    assign op_mul = inst_mult | inst_multu;
+    assign op_div = inst_div | inst_divu;
+
+
+
 
     // MUL part
     wire [63:0] mul_result;
@@ -121,7 +125,7 @@ module EX(
 
     // DIV part
     wire [63:0] div_result;
-    wire inst_div, inst_divu;
+    //wire inst_div, inst_divu;
     wire div_ready_i;
     reg stallreq_for_div;
     assign stallreq_for_ex = stallreq_for_div;
@@ -211,5 +215,43 @@ module EX(
     end
 
     // mul_result å div_result å¯ä»¥ç´æ¥ä½¿ç¨
+    assign hi_we = inst_mthi | inst_div | inst_divu | inst_mult | inst_multu;
+    assign lo_we = inst_mtlo | inst_div | inst_divu | inst_mult | inst_multu;
+
+    assign hi_o = inst_mthi ? rf_rdata1 :
+                  op_mul ? mul_result[63 : 32] :
+                  op_div ? div_result[63 : 32] :
+                  32'b0;
+    assign lo_o = inst_mtlo ? rf_rdata1 :
+                  op_mul ? mul_result[31 : 0] :
+                  op_div ? div_result[31 : 0] :
+                  32'b0;
+    assign hilo_bus = {
+        hi_we, // 65
+        hi_o,  // 64:33
+        lo_we, // 32
+        lo_o   // 31:0
+    };
+    assign ex_result = inst_mfhi ? hi_i :
+                       inst_mflo ? lo_i :
+                       alu_result;
+
+    assign ex_to_mem_bus = {
+        hilo_bus,       // 141:76
+        ex_pc,          // 75:44
+        data_ram_en,    // 43
+        data_ram_wen,   // 42:39
+        sel_rf_res,     // 38
+        rf_we,          // 37
+        rf_waddr,       // 36:32
+        ex_result       // 31:0
+    };
+
+    assign ex_to_rf_bus = {
+        hilo_bus,        // 103:38
+        rf_we,          // 37
+        rf_waddr,       // 36:32
+        ex_result       // 31:0
+    };
     
 endmodule
