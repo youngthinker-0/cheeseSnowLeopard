@@ -39,11 +39,8 @@ module MEM(
     wire [31:0] ex_result;
     wire [31:0] mem_result;
     wire [65:0] hilo_bus;
-    wire [7:0] ldst_op;
-    wire inst_lb, inst_lbu, inst_lh, inst_lhu, inst_lw, inst_sb, inst_sh, inst_sw;
 
     assign {
-        ldst_op,
         hilo_bus,       // 141:76
         mem_pc,         // 75:44
         data_ram_en,    // 43
@@ -54,22 +51,7 @@ module MEM(
         ex_result       // 31:0
     } =  ex_to_mem_bus_r;
 
-    assign {
-        inst_lb, inst_lbu, inst_lh, inst_lhu, inst_lw, inst_sb, inst_sh, inst_sw
-    } = ldst_op;
-    assign mem_result = (sel_rf_res & inst_lb & ex_result[1:0] == 2'b00) ? {{24{data_sram_rdata[7]}},data_sram_rdata[7:0]} :
-                        (sel_rf_res & inst_lb & ex_result[1:0] == 2'b01) ? {{24{data_sram_rdata[15]}},data_sram_rdata[15:8]} :
-                        (sel_rf_res & inst_lb & ex_result[1:0] == 2'b10) ? {{24{data_sram_rdata[23]}},data_sram_rdata[23:16]} :
-                        (sel_rf_res & inst_lb & ex_result[1:0] == 2'b11) ? {{24{data_sram_rdata[31]}},data_sram_rdata[31:24]} :
-                        (sel_rf_res & inst_lbu & ex_result[1:0] == 2'b00) ? {{24'b0}, data_sram_rdata[7:0]} :
-                        (sel_rf_res & inst_lbu & ex_result[1:0] == 2'b01) ? {{24'b0}, data_sram_rdata[15:8]} :
-                        (sel_rf_res & inst_lbu & ex_result[1:0] == 2'b10) ? {{24'b0}, data_sram_rdata[23:16]} :
-                        (sel_rf_res & inst_lbu & ex_result[1:0] == 2'b11) ? {{24'b0}, data_sram_rdata[31:24]} :
-                        (sel_rf_res & inst_lh & ex_result[1:0] == 2'b00) ? {{16{data_sram_rdata[15]}},data_sram_rdata[15:0]} :
-                        (sel_rf_res & inst_lh & ex_result[1:0] == 2'b10) ? {{16{data_sram_rdata[31]}},data_sram_rdata[31:16]} :
-                        (sel_rf_res & inst_lhu & ex_result[1:0] == 2'b00) ? {{16'b0},data_sram_rdata[15:0]} :
-                        (sel_rf_res & inst_lhu & ex_result[1:0] == 2'b10) ? {{16'b0},data_sram_rdata[31:16]} :
-                        (sel_rf_res & inst_lw) ? data_sram_rdata : 32'b0;
+    assign mem_result = sel_rf_res ? data_sram_rdata : 32'b0;
     assign rf_wdata = sel_rf_res & data_ram_en ? mem_result : ex_result;
 
     assign mem_to_wb_bus = {

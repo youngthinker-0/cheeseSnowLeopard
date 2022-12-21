@@ -51,12 +51,8 @@ module EX(
     wire op_mul, op_div;
     wire [65:0] hilo_bus;
     wire [31:0] hi_o,lo_o;
-    wire [7:0] ldst_op;
-    wire inst_lb, inst_lbu, inst_lh, inst_lhu, inst_lw, inst_sb, inst_sh, inst_sw;
-
 
     assign {
-        ldst_op,
         hilo_op,        // 230:223
         hi_i,lo_i,      // 222:159
         ex_pc,          // 158:127
@@ -72,9 +68,6 @@ module EX(
         rf_rdata1,         // 63:32
         rf_rdata2          // 31:0
     } = id_to_ex_bus_r;
-    assign {
-        inst_lb, inst_lbu, inst_lh, inst_lhu, inst_lw, inst_sb, inst_sh, inst_sw
-    } = ldst_op;
 
     wire [31:0] imm_sign_extend, imm_zero_extend, sa_zero_extend;
     assign imm_sign_extend = {{16{inst[15]}},inst[15:0]};
@@ -98,21 +91,13 @@ module EX(
         .alu_result  (alu_result  )
     );
 
-    assign inst_is_load = inst_lw | inst_lb | inst_lbu | inst_lh | inst_lhu;
+    assign inst_is_load = (inst[31:26] == 6'b10_0011 | inst[31:26] == 6'b10_0000);
 
    
     assign data_sram_en = data_ram_en;
-    assign data_sram_wen = (inst_sb & ex_result[1:0] == 2'b00 ) ? 4'b0001 :
-                           (inst_sb & ex_result[1:0] == 2'b01 ) ? 4'b0010 :
-                           (inst_sb & ex_result[1:0] == 2'b10 ) ? 4'b0100 :
-                           (inst_sb & ex_result[1:0] == 2'b11 ) ? 4'b1000 :
-                           (inst_sh & ex_result[1:0] == 2'b00 ) ? 4'b0011 :
-                           (inst_sh & ex_result[1:0] == 2'b10 ) ? 4'b1100 :
-                            data_ram_wen;
+    assign data_sram_wen = data_ram_wen;
     assign data_sram_addr = ex_result;
-    assign data_sram_wdata = inst_sb ? {4{rf_rdata2[7:0]}} : 
-                             inst_sh ? {2{rf_rdata2[15:0]}} : 
-                             rf_rdata2;
+    assign data_sram_wdata = rf_rdata2;
     //hilo-hilo-hilo
 
     assign {
@@ -253,7 +238,6 @@ module EX(
                        alu_result;
 
     assign ex_to_mem_bus = {
-        ldst_op,        // 149:142
         hilo_bus,       // 141:76
         ex_pc,          // 75:44
         data_ram_en,    // 43
