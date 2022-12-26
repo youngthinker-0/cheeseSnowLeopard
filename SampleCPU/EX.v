@@ -113,7 +113,6 @@ module EX(
     // MUL part
     wire [63:0] mul_result;
     wire mul_signed; // æç¬¦å·ä¹æ³æ è®°
-    assign mul_signed = inst_mult;
 
     mul u_mul(
     	.clk        (clk            ),

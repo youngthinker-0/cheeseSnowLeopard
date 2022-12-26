@@ -103,6 +103,7 @@ module mycpu_core(
     CTRL u_CTRL(
     	.rst   (rst   ),
         .stallreq_for_load(stallreq_for_load),
+        .stallreq_for_ex  (stallreq_for_ex  ),
         .stall (stall )
     );
     
