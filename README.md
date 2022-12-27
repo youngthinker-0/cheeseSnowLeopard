@@ -20,7 +20,7 @@ master分支不用管，当时不知道干啥创了这个分支。
 只是这样说还是不太具体，正好我弄完CPU的时间也很久了，我想从头开始，再把这个代码模拟一遍来过到64号点，正好记录一下之前debug没有记录的具体信息，然后复现一下当时的情况吧。我也好再熟悉熟悉代码，为了验收加指令做做准备。（这两天阳了，计算机系统办了缓考，阳的不是时候。。。）  
 下午再写。
 ## 12.? 
-初始状态，什么都不加，运行时会卡在0xbfc006bc，这时候我记不清是几号了，在宾馆隔离时做的
+初始状态，什么都不加，运行时会卡在0xbfc006bc，这时候我记不清是几号了，在宾馆隔离时做的  
 解决数据相关问题，将ex_to_rf_bus，mem_to_rf_bus，wb_to_rf_bus加好，id段的rdata1,rdata2写好。
 加完数据相关的东西之后会卡在这里：  
 reference: PC = 0xbfc006f8, wb_rf_wnum = 0x19, wb_rf_wdata = 0x9fc00704   
@@ -33,14 +33,17 @@ subu指令没加，从这里开始加指令。
 reference: PC = 0x9fc00d5c, wb_rf_wnum = 0x0a, wb_rf_wdata = 0x00000000  
 mycpu    : PC = 0x9fc00d5c, wb_rf_wnum = 0x0a, wb_rf_wdata = 0xbfaf5a86  
 过了1号点此时。
-## 12.13
+## 12.12
 这时候我把stallreq_for_load加上了，但是不知道为啥，，，我那时候把inst_sw写到了rf_we里，导致我一直卡在这个点：  
 reference: PC = 0x9fc00d54, wb_rf_wnum = 0x09, wb_rf_wdata = 0x0000aaaa  
 mycpu    : PC = 0x9fc00d54, wb_rf_wnum = 0x09, wb_rf_wdata = 0xbfaffaba  
 当时卡了好几天，我记得最后一次实验课的时候我还卡在这里呢。。。很苦恼。  
-## 12.15
+## 12.14
 解决上面那个问题之后，再运行程序会陷入无限循环，查看那个波形图的wb_pc会发现最后正常的地方是9fc00d80，看看test.s知道我们又该加指令了。  
 加一条指令sltu，可以过5号点。  
 reference: PC = 0xbfc49624, wb_rf_wnum = 0x02, wb_rf_wdata = 0xc822c7e8  
 mycpu    : PC = 0xbfc49624, wb_rf_wnum = 0x02, wb_rf_wdata = 0x000000e8  
-这一部分极其无聊，就是一直加指令。  
+这里注意将data_ram_wen在inst_sw时赋值为4‘b1111，如果只是赋值为1会卡在这里。（这是我重新模拟的时候踩的坑，之前没有在这里卡住。）  
+之后加的指令有slt，加完就到8号点了，和我在github的commit也可以对应起来。  
+reference: PC = 0xbfc03574, wb_rf_wnum = 0x02, wb_rf_wdata = 0x00000001  
+mycpu    : PC = 0xbfc050e0, wb_rf_wnum = 0x09, wb_rf_wdata = 0x09000000  
