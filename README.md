@@ -49,3 +49,22 @@ reference: PC = 0xbfc03574, wb_rf_wnum = 0x02, wb_rf_wdata = 0x00000001
 mycpu    : PC = 0xbfc050e0, wb_rf_wnum = 0x09, wb_rf_wdata = 0x09000000  
 
 ## 晚上又开始发烧了，我不打算继续写这个日记，重新熟悉代码的目的已经达到，剩下的12月15日到21日所添加的东西都在github的记录中有呈现，再写就相当于对比一下github上不同时间提交之间的区别，做一下总结罢了。以后再弄这种东西我会做好记录，把细节都呈现出来。其实今天下午重新模拟一遍还是有好处的，我遇到了一些原先自己没有遇到的bug。我本来以为自己已经编写了一遍程序，从头再编写一遍是一件很轻松的事情，并不是这样的。
+## 始终觉得不写完有点不得劲，我想把这个日记补全。。。
+## 12.15
+加指令slti，sltiu，j，add，addi，sub，and，andi，nor，xori，sllv，sra，srav，srl，srlv。  
+过36号点，到了这个位置：  
+reference: PC = 0xbfc560a0, wb_rf_wnum = 0x02, wb_rf_wdata = 0x40200000  
+mycpu    : PC = 0xbfc560e0, wb_rf_wnum = 0x15, wb_rf_wdata = 0x40200000  
+这一部分加的毫无趣味，就是在id段对着那个A03文档补指令，也是最轻松的。
+## 12.18
+仍然是加指令bgez，bgtz，blez，bltz，bltzal，bgezal，jalr。  
+过43点，到这个位置：  
+reference: PC = 0xbfc560a0, wb_rf_wnum = 0x02, wb_rf_wdata = 0x40200000  
+mycpu    : PC = 0xbfc560e0, wb_rf_wnum = 0x15, wb_rf_wdata = 0x40200000  
+这一部分稍微有意思的东西就是分支跳转指令你需要加入自己的判断方法，就是rs_ge gt le lt_rt那些东西。  
+主要是学了学这些英文缩写都是什么意思：
+ge-greater than or equal to-大于等于  
+gt-greater than-大于  
+le-less than or equal to-小于等于  
+lt-less than-小于  
+还是比着A03文档加，轻松，这两天在写机器学习课设的报告，所以写了3天才写到43号点。  
