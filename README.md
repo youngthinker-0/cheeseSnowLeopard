@@ -68,3 +68,15 @@ gt-greater than-大于
 le-less than or equal to-小于等于  
 lt-less than-小于  
 还是比着A03文档加，轻松，这两天在写机器学习课设的报告，所以写了3天才写到43号点。  
+## 12.20
+首先在这天加完了hilo，这是我觉得最难的一部分了，具体前面有写。
+加的指令有mfhi，mflo，mthi，mtlo，div，divu，mult，multu。  
+加hilo首先要想那个32个的reg一样新建一个hilo_reg.v，将hilo_bus加到很多的总线中去，比如说ex_to_mem_bus，ex_to_rf_bus……我们在id段需要像那32个通用寄存器一样取出hilo寄存器中的值，这里需要注意数据相关问题，模仿rf_rdata和rdata那样子进行处理，最后hilo寄存器中的值作为hi_i，lo_i传入ex，在ex段做的事情是，如果是要将数据写入到hilo寄存器，如mthi，mul，div之类的指令，hi_o，lo_o用来存储要写入的数据，并作为hilo_bus中的一部分往后传，就像rf_wdata一样。如果是mfhi，mflo之类将hilo寄存器中的值取出，存入到通用寄存器中，那这一部分ex_result将会被赋值为hilo寄存器中的值（hi_i，lo_i）。  
+加完hilo可以到达这里：  
+reference: PC = 0xbfc7d7dc, wb_rf_wnum = 0x15, wb_rf_wdata = 0x00000002  
+mycpu    : PC = 0xbfc7d7dc, wb_rf_wnum = 0x15, wb_rf_wdata = 0x00000000  
+这一部分想了3天，还有好多是抄的助教录屏里的东西，对我来说是最难的部分。  
+之后还加了stallreq_for_ex，主要是因为除法它是多周期的，在一个周期算不完，具体原理还没深入了解。  但是这一部分我觉得不难，大部分东西都给你写好了。  
+加完过45号点，到达这里：  
+reference: PC = 0xbfc3494c, wb_rf_wnum = 0x15, wb_rf_wdata = 0x0a20a480  
+mycpu    : PC = 0xbfc3494c, wb_rf_wnum = 0x15, wb_rf_wdata = 0xxxxxxxxx    
