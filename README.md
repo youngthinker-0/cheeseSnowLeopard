@@ -79,4 +79,13 @@ mycpu    : PC = 0xbfc7d7dc, wb_rf_wnum = 0x15, wb_rf_wdata = 0x00000000
 之后还加了stallreq_for_ex，主要是因为除法它是多周期的，在一个周期算不完，具体原理还没深入了解。  但是这一部分我觉得不难，大部分东西都给你写好了。  
 加完过45号点，到达这里：  
 reference: PC = 0xbfc3494c, wb_rf_wnum = 0x15, wb_rf_wdata = 0x0a20a480  
-mycpu    : PC = 0xbfc3494c, wb_rf_wnum = 0x15, wb_rf_wdata = 0xxxxxxxxx    
+mycpu    : PC = 0xbfc3494c, wb_rf_wnum = 0x15, wb_rf_wdata = 0xxxxxxxxx  
+## 12.21
+卡在45号点是最蠢的，mul那一块我录屏没抄全。。。  
+加了一句话assign mul_signed = inst_mult，过58号点，到这里：
+reference: PC = 0xbfc371a0, wb_rf_wnum = 0x02, wb_rf_wdata = 0x0000000b  
+mycpu    : PC = 0xbfc371a4, wb_rf_wnum = 0x05, wb_rf_wdata = 0x800d6764  
+
+
+
+ 
