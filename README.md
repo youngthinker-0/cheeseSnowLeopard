@@ -69,7 +69,7 @@ le-less than or equal to-小于等于
 lt-less than-小于  
 还是比着A03文档加，轻松，这两天在写机器学习课设的报告，所以写了3天才写到43号点。  
 ## 12.20
-首先在这天加完了hilo，这是我觉得最难的一部分了，具体前面有写。
+首先在这天加完了hilo，这是我觉得最难的一部分了，具体前面有写。  
 加的指令有mfhi，mflo，mthi，mtlo，div，divu，mult，multu。  
 加hilo首先要想那个32个的reg一样新建一个hilo_reg.v，将hilo_bus加到很多的总线中去，比如说ex_to_mem_bus，ex_to_rf_bus……我们在id段需要像那32个通用寄存器一样取出hilo寄存器中的值，这里需要注意数据相关问题，模仿rf_rdata和rdata那样子进行处理，最后hilo寄存器中的值作为hi_i，lo_i传入ex，在ex段做的事情是，如果是要将数据写入到hilo寄存器，如mthi，mul，div之类的指令，hi_o，lo_o用来存储要写入的数据，并作为hilo_bus中的一部分往后传，就像rf_wdata一样。如果是mfhi，mflo之类将hilo寄存器中的值取出，存入到通用寄存器中，那这一部分ex_result将会被赋值为hilo寄存器中的值（hi_i，lo_i）。  
 加完hilo可以到达这里：  
@@ -82,10 +82,16 @@ reference: PC = 0xbfc3494c, wb_rf_wnum = 0x15, wb_rf_wdata = 0x0a20a480
 mycpu    : PC = 0xbfc3494c, wb_rf_wnum = 0x15, wb_rf_wdata = 0xxxxxxxxx  
 ## 12.21
 卡在45号点是最蠢的，mul那一块我录屏没抄全。。。  
-加了一句话assign mul_signed = inst_mult，过58号点，到这里：
+ex段加了一句话assign mul_signed = inst_mult，过58号点，到这里：  
 reference: PC = 0xbfc371a0, wb_rf_wnum = 0x02, wb_rf_wdata = 0x0000000b  
 mycpu    : PC = 0xbfc371a4, wb_rf_wnum = 0x05, wb_rf_wdata = 0x800d6764  
-
-
-
- 
+继续，根据助教仓库里SampleCPU的README.md写的关于按字节存取的示例代码，我理解了之后写了一个不美观的。  
+加的指令有lb，lbu，lh，lhu，sb，sh。  
+在ex段主要就是改对于data_sram_wen和data_sram_wdata这两个，就是按字节把通用寄存器里的值往sram里存，store指令。  
+mem段改的是mem_result，目的是按字节读data_sram_rdata到寄存器里，load指令。  
+在理解load，store的原理之后我觉得这个没啥难度，而且有助教的代码作为参考。  
+写完这些，过64号点，到这里：  
+reference: PC = 0xbfc00380, wb_rf_wnum = 0x1a, wb_rf_wdata = 0x00004000  
+mycpu    : PC = 0xbfc6a074, wb_rf_wnum = 0x09, wb_rf_wdata = 0x41000000  
+## 过64号点之后
+我看了《自己动手做cpu》后面的异常处理相关的东西（还把syscall和break指令加了上去，但并没有实现），之后有很多其他的考试和报告要写，而且验收的安排也修改了，我便去着手准备其他的东西，没有再深入研究。这两天阳了以后，我决定缓考计算机系统，有了一些时间（大部分时候脑子不清醒）。所以我写下这篇日记，回顾一下以前做的东西。收获很多，感想很多，在这里不写了，因为实在是太头晕了。。。有机会再写吧！
